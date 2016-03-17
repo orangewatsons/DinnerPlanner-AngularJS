@@ -16,47 +16,14 @@ dinnerPlannerApp.controller('DishCtrl', function ($scope,$routeParams,Dinner) {
     return Dinner.getNumberOfGuests();
   }
 
-
-  $scope.addDishInCookiesToMenu=function(){
-    $scope.menu=$scope.menuInCookies;
-
-  }
   $scope.recipe = Dinner.Dish.get({id:$routeParams.dishId});
 
   $scope.dishCost = function(items){
   	return items * Dinner.getNumberOfGuests();
   }
 
-  $scope.menu = Dinner.getFullMenu();
-  /*
-  $scope.menuInCookies=Dinner.getFullMenuCookies();
-
-  for( var i=0; i< $scope.menu.length;i++){
-
-    $scope.receipeInCookies=Dinner.Dish.get({id:$scope.menuInCookies[i]});
-
-    $scope.menuInCookies.push(this.receipeInCookies);
-    alert(this.receipeInCookies);
-     //$scope.addDishInCookiesToMenu();
-     //$scope.menu=$scope.menuInCookies;
-
+  $scope.addDish = function(){
+    Dinner.addDishToMenu(this.recipe, this.recipe.Ingredients.length);
   }
-
-*/
-
-
-  $scope.addDishToMenu = function(){
-  //add dish to the menu (also store in to cookies);
-  	$scope.menu.push(this.recipe); 
-    Dinner.addDishtoMenuCookies($routeParams.dishId);
-    
-
-    Dinner.checkConfirmButton();
- 
-
-    Dinner.getTotalMenuPrice();
-  }
-
- 
-
- });
+  
+});

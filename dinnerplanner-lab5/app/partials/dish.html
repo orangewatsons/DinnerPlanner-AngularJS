@@ -14,7 +14,7 @@ Instructions, Ingredients and total cost. -->
         <p>{{recipe.Description}}</p>
         <br>
         <a ng-href="#/search" class="btn btn-primary" style="margin-bottom:10px;">back to Select Dish</a>
-      </div>DishCtrl
+      </div>
       <div class="col-lg-6" style="background-color:#CC9966;">
         <h5>Ingredients for <span>{{getNumberOfGuests()}}</span> people</h5>
           <table class="table">
@@ -31,8 +31,8 @@ Instructions, Ingredients and total cost. -->
           </table>
           <table>
             <tr>
-              <td><button id="confirmBtn" class="btn btn-primary" style="margin-bottom:15px;margin-top:15px;" ng-click="addDishToMenu()">Confirm Dish</button></td>
-              <td style="text-align:right;">SEK&nbsp;</td><td ng-model="cost">{{dishCost(recipe.Ingredients.length)}}</td>
+              <td><button id="confirmBtn" class="btn btn-primary" style="margin-bottom:15px;margin-top:15px;" ng-click="addDish()">Confirm Dish</button></td>
+              <td style="text-align:right;">SEK&nbsp;</td><td>{{dishCost(recipe.Ingredients.length)}}</td>
             </tr>
           </table>
       </div>

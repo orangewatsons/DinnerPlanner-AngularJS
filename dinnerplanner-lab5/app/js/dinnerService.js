@@ -5,20 +5,10 @@
 // the next time.
 dinnerPlannerApp.factory('Dinner',function ($resource, $cookieStore) {
   
-  //check to see whether the numberOfGuest is in cookies
-  // if yes, use the value in cookies, otherwise set 1
   var numberOfGuest = 1;
-  if($cookieStore.get("numberOfGuest")!=undefined){
 
-    numberOfGuest=$cookieStore.get("numberOfGuest");
-  }
-
-  var confirmSwitch
-
-
- /*reset the confirm button*/
-   this.checkConfirmButton = function(){
-    confirmSwitch=true;
+  this.checkConfirmButton = function(){
+    var confirmSwitch=true;
     if(menu.length>0){
       confirmSwitch=false;
     }
@@ -27,24 +17,17 @@ dinnerPlannerApp.factory('Dinner',function ($resource, $cookieStore) {
    }
 
 
-  
   this.setNumberOfGuests = function(num) {
     numberOfGuest = num;
     $cookieStore.put("numberOfGuest",num);
   }
 
   this.getNumberOfGuests = function() {
-    var result=$cookieStore.get("numberOfGuest");
-    return result;
-
+    if($cookieStore.get("numberOfGuest")!=undefined){
+      numberOfGuest=$cookieStore.get("numberOfGuest");
+    }
+    return numberOfGuest;
   }
-
-
-/*test to see how to operate cookies out of dinnerService**/
-this.getCookieNumberOfGuest=function(){
-    var result=$cookieStore.get("numberOfGuest");
-    return result;
-}
 
 
   // TODO in Lab 5: Add your model code from previous labs
@@ -52,75 +35,65 @@ this.getCookieNumberOfGuest=function(){
   // you will need to modify the model (getDish and getAllDishes) 
   // a bit to take the advantage of Angular resource service
   // check lab 5 instructions for details
-  this.DishSearch = $resource('http://api.bigoven.com/recipes',{pg:1,rpp:25,api_key:'18f3cT02U9f6yRl3OKDpP8NA537kxYKu'});
+  this.DishSearch = $resource('http://api.bigoven.com/recipes',{pg:1,rpp:25,api_key:'66J8l00npnHHZcCNLRhxkfW1OHxbojy4'});
   
-  this.Dish = $resource('http://api.bigoven.com/recipe/:id',{api_key:'18f3cT02U9f6yRl3OKDpP8NA537kxYKu'}); 
+  this.Dish = $resource('http://api.bigoven.com/recipe/:id',{api_key:'66J8l00npnHHZcCNLRhxkfW1OHxbojy4'}); 
+
+  var totalCost = 0;
 
   var menu = [];
   var menuInCookies=[];
 
-  if($cookieStore.get("menu")){
-    menuInCookies =$cookieStore.get("menu");
-   // alert(menuInCookis.length);
-    for(var i=0;i<menuInCookies.length;i++){
-    //alert(menuInCookis[i]);
-      var receipeInCookies=this.Dish.get({id:menuInCookies[i]});
-      console.log("menuIncookies"+i+": "+menuInCookies[i]);
-      menu.push(receipeInCookies);
-    }
-   // menu=menuInCookis;
-  }
 
- 
-
-  this.getFullMenuCookies=function(){
-    var result=$cookieStore.get("menu");
-    return result;
-  }
   this.getFullMenu = function(){
-    
     return menu;
   }
 
-  
-  this.removeDishFromMenu = function(pos){
-    menu.splice(pos, 1);
-    menuInCookies.splice(pos,1);
-    $cookieStore.put("menu", menuInCookies);
-
-     }
-
-  this.addDishtoMenuCookies=function(id){
-    menuInCookies.push(id);
-    $cookieStore.put("menu",menuInCookies);
-    console.log("menu after adding"+$cookieStore.get("menu").length);
+  this.addDishToMenu = function(obj, cost){
+    totalCost += cost;
+    menu.push(obj);
+    menuInCookies.push(obj.RecipeID);
+    $cookieStore.put("menuInCookies", menuInCookies);
   }
- 
 
-  var totalCost = 0;
+  this.getMenuInCookies = function(){
+    return menuInCookies;
+  }
 
-
-  this.getTotalMenuPrice = function(cost){
-
-    var cells = document.querySelectorAll(".itemCost");
-   
-    console.log(cells);
-
-
-    for (var i = 0; i < cells.length; i++){
-      if(isNaN(cells[i].innerHTML) == true){
-        cells[i].innerHTML = 0;
-      }
-
-      totalCost+=parseFloat(cells[i].innerHTML);
+  this.removeDishFromMenu = function(pos, cost){   
+    if(menu != undefined){
+      totalCost -= cost;
+      menu.splice(pos, 1);
+      menuInCookies.splice(pos, 1);
     }
-     console.log(totalCost);
-       
-    return totalCost;
-
+    $cookieStore.put('menuInCookies', menuInCookies);
   }
 
-  
+
+  this.getTotalMenuPrice = function(guests){
+    return totalCost*guests;
+  }
+
+  var menuCookie = $cookieStore.get('menuInCookies');
+
+  if(menuCookie){
+    var oldMenuCookie = menuCookie;
+    menuCookie = [];
+
+    for(key in oldMenuCookie){
+      var dishID = oldMenuCookie[key];
+
+      var self = this;
+      this.Dish.get( {id:dishID} ,function(data){
+        self.addDishToMenu(data, data.Ingredients.length);
+      },function(data){
+        // do nothing if error
+      });
+    }
+  }else{
+    menuCookie = [];
+  }
+
   // Angular service needs to return an object that has all the
   // methods created in it. You can consider that this is instead
   // of calling var model = new DinnerModel() we did in the previous labs
